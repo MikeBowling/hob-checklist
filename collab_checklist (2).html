@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOB MOD Checklist</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f11;
+    --surface: #14181c;
+    --border: #1e2530;
+    --border-active: #2e3a4a;
+    --accent: #00e5ff;
+    --accent-dim: rgba(0,229,255,0.12);
+    --green: #00e676;
+    --green-dim: rgba(0,230,118,0.08);
+    --red: #ff3d57;
+    --red-dim: rgba(255,61,87,0.1);
+    --amber: #ffab00;
+    --amber-dim: rgba(255,171,0,0.08);
+    --text: #e8edf2;
+    --text-muted: #5a6a7a;
+    --text-dim: #2e3a48;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px); pointer-events:none; z-index:1000; }
+
+  .header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 20px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; gap:12px; }
+  .header-left { display:flex; align-items:center; gap:12px; }
+  .logo { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:0.2em; color:var(--accent); }
+  .logo span { color:var(--text-muted); }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .sync-label { font-family:var(--mono); font-size:10px; letter-spacing:0.1em; }
+  .header-right { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .user-badge { font-family:var(--mono); font-size:10px; color:var(--text-muted); background:var(--border); padding:4px 10px; border-radius:2px; white-space:nowrap; }
+  .user-badge strong { color:var(--accent); }
+  .active-users { display:flex; align-items:center; gap:4px; }
+  .avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; font-weight:700; border:2px solid var(--bg); }
+
+  .container { max-width:960px; margin:0 auto; padding:28px 20px 80px; }
+  .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:16px; flex-wrap:wrap; }
+  .page-title { font-family:var(--mono); font-size:15px; font-weight:700; letter-spacing:0.07em; color:var(--text); }
+  .progress-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:130px; }
+  .progress-label { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; color:var(--text-muted); }
+  .progress-bar { width:130px; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--green); border-radius:2px; transition:width 0.4s ease; box-shadow:0 0 8px var(--green); }
+
+  .toolbar { display:flex; align-items:center; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .btn { font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:7px 13px; border-radius:2px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text-muted); }
+  .btn-ghost:hover { border-color:var(--border-active); color:var(--text); background:rgba(255,255,255,0.03); }
+  .spacer { flex:1; }
+  .ts { font-family:var(--mono); font-size:9px; color:var(--text-dim); }
+  .badge { display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:8px; letter-spacing:0.12em; text-transform:uppercase; padding:2px 7px; border-radius:2px; }
+  .badge-collective { background:var(--accent-dim); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
+  .badge-individual { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(255,171,0,0.2); }
+
+  .section { margin-bottom:20px; border:1px solid var(--border); border-radius:4px; overflow:hidden; transition:border-color 0.2s; }
+  .section:hover { border-color:var(--border-active); }
+  .section-header { display:flex; align-items:center; gap:10px; padding:9px 16px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+  .section-toggle { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+  .section-name { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.2em; color:var(--text-muted); text-transform:uppercase; flex:1; }
+  .section-count { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+
+  .items-table { width:100%; border-collapse:collapse; }
+  .col-header-row th { font-family:var(--mono); font-size:9px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); padding:6px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  .col-header-row th.col-check { width:44px; text-align:center; }
+
+  .task-row { border-bottom:1px solid var(--border); transition:background 0.12s; }
+  .task-row:last-child { border-bottom:none; }
+  .task-row:hover { background:rgba(255,255,255,0.012); }
+  .task-row.all-done { background:var(--green-dim); }
+  .task-row.partial { background:var(--amber-dim); }
+  .task-row td { padding:9px 12px; vertical-align:middle; }
+  .task-text { font-size:13px; color:var(--text); line-height:1.4; }
+  .task-row.all-done .task-text { color:var(--text-muted); text-decoration:line-through; text-decoration-color:var(--text-dim); }
+  .task-meta { font-family:var(--mono); font-size:9px; color:var(--text-dim); margin-top:3px; }
+
+  .check-box { width:17px; height:17px; border:1.5px solid var(--border-active); border-radius:2px; cursor:pointer; margin:0 auto; display:flex; align-items:center; justify-content:center; transition:all 0.15s; background:transparent; }
+  .check-box.done { background:var(--green); border-color:var(--green); }
+  .check-box::after { content:''; width:9px; height:5px; border-left:2px solid var(--bg); border-bottom:2px solid var(--bg); transform:rotate(-45deg) translateY(-1px); opacity:0; transition:opacity 0.1s; }
+  .check-box.done::after { opacity:1; }
+
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); z-index:500; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .modal { background:var(--surface); border:1px solid var(--border-active); border-radius:4px; padding:30px; max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .modal-title { font-family:var(--mono); font-size:12px; font-weight:700; letter-spacing:0.2em; color:var(--accent); text-transform:uppercase; margin-bottom:6px; }
+  .modal-sub { font-size:12px; color:var(--text-muted); margin-bottom:22px; line-height:1.6; }
+  .modal-label { font-family:var(--mono); font-size:9px; letter-spacing:0.15em; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:5px; }
+  .modal-field { margin-bottom:14px; }
+  .modal-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:2px; color:var(--text); font-family:var(--mono); font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.2s; }
+  .modal-input:focus { border-color:var(--accent); }
+  .modal-select { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:2px; color:var(--text); font-family:var(--mono); font-size:12px; padding:9px 12px; outline:none; cursor:pointer; }
+  .modal-note { font-family:var(--mono); font-size:9px; color:var(--text-dim); text-align:center; letter-spacing:0.07em; margin-top:10px; line-height:1.6; }
+  .btn-primary { background:var(--accent-dim); border:1px solid var(--accent); color:var(--accent); justify-content:center; width:100%; margin-top:20px; font-size:12px; padding:10px; }
+  .btn-primary:hover { background:rgba(0,229,255,0.2); }
+
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--surface); border:1px solid var(--border-active); border-radius:3px; padding:9px 14px; font-family:var(--mono); font-size:11px; color:var(--text); z-index:999; opacity:0; transform:translateY(6px); transition:all 0.22s; pointer-events:none; max-width:280px; }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .toast.success { border-left:3px solid var(--green); }
+  .toast.info    { border-left:3px solid var(--accent); }
+  .toast.warn    { border-left:3px solid var(--amber); }
+  .toast.error   { border-left:3px solid var(--red); }
+</style>
+</head>
+<body>
+
+<!-- Setup Modal -->
+<div class="modal-bg" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">// HOB MOD Checklist</div>
+    <div class="modal-sub">Select your name and enter tonight's show ID. Everyone on the same ID syncs live in real time.</div>
+    <div class="modal-field">
+      <label class="modal-label">You are</label>
+      <select class="modal-select" id="nameSelect">
+        <option value="">— Select your name —</option>
+        <option>Mike</option>
+        <option>Taylor</option>
+        <option>Alan</option>
+        <option>Briana</option>
+        <option>Lorenzo</option>
+        <option>Sam</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Tonight's Show ID</label>
+      <input class="modal-input" id="listKeyInput" type="text" placeholder="e.g. march28" maxlength="40" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="joinChecklist()">→ JOIN</button>
+    <div class="modal-note">
+      Everyone use the same Show ID to sync together.<br>
+      No Claude account needed — just open this link.
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">HOB <span>MOD</span></div>
+    <div class="live-dot" id="liveDot"></div>
+    <div class="sync-label" id="syncLabel" style="color:var(--text-muted)">CONNECTING...</div>
+  </div>
+  <div class="header-right">
+    <div class="active-users" id="activeUsers"></div>
+    <div class="user-badge">LOGGED IN: <strong id="headerUser">—</strong></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="container">
+  <div class="page-header">
+    <div class="page-title">HOB HOUSTON — MOD SHOW NIGHT CHECKLIST</div>
+    <div class="progress-wrap">
+      <div class="progress-label" id="progressLabel">— / — COMPLETE</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <span class="badge badge-collective">● Collective</span>
+    <span class="badge badge-individual">● Individual</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" onclick="confirmReset()">↺ RESET NIGHT</button>
+    <div class="ts" id="lastSyncTs">—</div>
+  </div>
+  <div id="sectionsContainer"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Firebase config ──────────────────────────────────────────────────────────
+const FB_URL = 'https://hob-checklist-default-rtdb.firebaseio.com';
+
+// ─── Team ─────────────────────────────────────────────────────────────────────
+const TEAM = ['Mike','Taylor','Alan','Briana','Lorenzo','Sam'];
+const COLORS = {
+  Mike:'#ff6d00', Taylor:'#00e5ff', Alan:'#00e676',
+  Briana:'#ff6d94', Lorenzo:'#ffab00', Sam:'#b388ff'
+};
+
+// ─── Checklist template ───────────────────────────────────────────────────────
+const TEMPLATE = [
+  { name:'ADMINISTRATIVE', items:[
+    { text:'Check all emails', type:'individual' },
+    { text:'Review new communications from leadership, Production', type:'individual' },
+  ]},
+  { name:'BARS & INVENTORY', items:[
+    { text:'Unlock all bars', type:'collective' },
+    { text:'Check for any received liquor orders', type:'collective' },
+    { text:'Put all received product away', type:'collective' },
+  ]},
+  { name:'STAFFING & SCHEDULING', items:[
+    { text:'Create the day sheet', type:'collective' },
+    { text:'Ensure bartenders stay on a fair rotation', type:'collective' },
+  ]},
+  { name:'COORDINATION WITH PRODUCTION', items:[
+    { text:'Connect with Production about show plan', type:'collective' },
+    { text:'Confirm Meet & Greets', type:'collective' },
+    { text:'Confirm Pre-Show Events', type:'collective' },
+    { text:'Check door time — roll early if possible', type:'collective' },
+  ]},
+  { name:'PRE-SHIFT & TEAM ALIGNMENT', items:[
+    { text:'Run pre-shift with F&B crew', type:'collective' },
+    { text:'Ensure Security in correct positions', type:'collective' },
+    { text:'Confirm Bartenders / Servers / Concessions / VIP Host positions', type:'collective' },
+  ]},
+  { name:'SHOWTIME PREP', items:[
+    { text:'Ensure all areas staffed', type:'collective' },
+    { text:'Roll Doors', type:'collective' },
+  ]},
+  { name:'SECURITY & VENUE SWEEP', items:[
+    { text:'Confirm Security completed nightly duties', type:'collective' },
+    { text:'Verify with Security Leads before release', type:'collective' },
+  ]},
+  { name:'SERVER AREAS & PAPERWORK', items:[
+    { text:'Check all server areas closed properly', type:'collective' },
+    { text:'Sign off server paperwork', type:'collective' },
+    { text:'Sign off on paperwork for bartenders', type:'collective' },
+  ]},
+  { name:'BAR CLOSING & REPORTS', items:[
+    { text:'Check bartender closeout sheets', type:'collective' },
+    { text:'Inspect bar cleanliness', type:'collective' },
+    { text:'Mgmt handles checks if no Lead', type:'collective' },
+    { text:'Ensure bars & Concessions locked', type:'collective' },
+  ]},
+  { name:'END-OF-NIGHT REPORTING', items:[
+    { text:'Complete NSR & Labor', type:'collective' },
+    { text:'Send nightly emails with attachments', type:'collective' },
+    { text:'Verify distro lists', type:'collective' },
+  ]},
+  { name:'DOORS & VENUE SECURITY', items:[
+    { text:'Ensure exterior doors locked', type:'collective' },
+    { text:'If broken: call GreenStreet & email Todd', type:'collective' },
+  ]},
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let currentUser = '';
+let showId = '';
+let collapsed = {};
+let fbState = null; // live from Firebase
+
+// ─── Firebase helpers ─────────────────────────────────────────────────────────
+function fbPath(path) {
+  return `${FB_URL}/checklists/${showId}/${path}.json`;
+}
+
+async function fbGet(path) {
+  const r = await fetch(fbPath(path));
+  if (!r.ok) throw new Error('Firebase GET failed: ' + r.status);
+  return r.json();
+}
+
+async function fbSet(path, data) {
+  const r = await fetch(fbPath(path), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('Firebase SET failed: ' + r.status);
+  return r.json();
+}
+
+async function fbPatch(path, data) {
+  const r = await fetch(fbPath(path), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('Firebase PATCH failed: ' + r.status);
+  return r.json();
+}
+
+// ─── Build fresh state ────────────────────────────────────────────────────────
+function buildFreshState() {
+  return {
+    sections: TEMPLATE.map(sec => ({
+      name: sec.name,
+      items: sec.items.map(item => {
+        const base = { text: item.text, type: item.type };
+        if (item.type === 'collective') {
+          base.done = false; base.by = null; base.ts = null;
+        } else {
+          base.checks = {};
+          TEAM.forEach(p => { base.checks[p] = { done: false, ts: null }; });
+        }
+        return base;
+      })
+    }))
+  };
+}
+
+// ─── Join ─────────────────────────────────────────────────────────────────────
+async function joinChecklist() {
+  const name = document.getElementById('nameSelect').value;
+  const key = document.getElementById('listKeyInput').value.trim().replace(/\s+/g, '-').toLowerCase();
+  if (!name) { toast('Please select your name', 'warn'); return; }
+  if (!key) { toast('Please enter a Show ID', 'warn'); return; }
+
+  currentUser = name;
+  showId = key;
+
+  document.getElementById('headerUser').textContent = name;
+  document.getElementById('headerUser').style.color = COLORS[name];
+  document.getElementById('setupModal').style.display = 'none';
+  setStatus('connecting');
+
+  try {
+    // Load existing or create new
+    let existing = await fbGet('');
+    if (!existing || !existing.sections) {
+      const fresh = buildFreshState();
+      await fbSet('', fresh);
+      existing = fresh;
+    }
+    fbState = existing;
+    render();
+    setStatus('live');
+    toast(`Joined as ${name} — show "${key}"`, 'success');
+  } catch(e) {
+    setStatus('error');
+    toast('Could not connect to Firebase. Check your network.', 'error');
+    return;
+  }
+
+  // Start real-time polling every 3 seconds
+  startPolling();
+  // Presence heartbeat
+  updatePresence();
+  setInterval(updatePresence, 10000);
+}
+
+// ─── Polling ──────────────────────────────────────────────────────────────────
+let pollInterval = null;
+let lastHash = '';
+
+function startPolling() {
+  pollInterval = setInterval(async () => {
+    try {
+      const remote = await fbGet('');
+      if (!remote) return;
+      const hash = JSON.stringify(remote);
+      if (hash !== lastHash) {
+        lastHash = hash;
+        fbState = remote;
+        render();
+        document.getElementById('lastSyncTs').textContent =
+          new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      }
+      setStatus('live');
+    } catch(e) {
+      setStatus('error');
+    }
+  }, 3000);
+}
+
+// ─── Presence ─────────────────────────────────────────────────────────────────
+async function updatePresence() {
+  try {
+    const presPath = `${FB_URL}/presence/${showId}/${currentUser}.json`;
+    await fetch(presPath, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: currentUser, color: COLORS[currentUser], ts: Date.now() })
+    });
+    // Load all presence
+    const r = await fetch(`${FB_URL}/presence/${showId}.json`);
+    const all = await r.json();
+    if (!all) return;
+    const now = Date.now();
+    const active = Object.values(all).filter(u => now - u.ts < 30000);
+    renderPresence(active);
+  } catch(e) {}
+}
+
+function renderPresence(users) {
+  document.getElementById('activeUsers').innerHTML = users
+    .map(u => `<div class="avatar" title="${u.name}" style="background:${u.color}22;color:${u.color};border-color:${u.color}55">${u.name.slice(0,2).toUpperCase()}</div>`)
+    .join('');
+}
+
+// ─── Status ───────────────────────────────────────────────────────────────────
+function setStatus(state) {
+  const lbl = document.getElementById('syncLabel');
+  const dot = document.getElementById('liveDot');
+  if (state === 'live') {
+    lbl.textContent = 'LIVE'; lbl.style.color = 'var(--green)';
+    dot.style.background = 'var(--green)'; dot.style.boxShadow = '0 0 8px var(--green)';
+  } else if (state === 'connecting') {
+    lbl.textContent = 'CONNECTING...'; lbl.style.color = 'var(--amber)';
+    dot.style.background = 'var(--amber)'; dot.style.boxShadow = '0 0 8px var(--amber)';
+  } else {
+    lbl.textContent = 'OFFLINE'; lbl.style.color = 'var(--red)';
+    dot.style.background = 'var(--red)'; dot.style.boxShadow = '0 0 8px var(--red)';
+  }
+}
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+async function toggleCollective(sIdx, iIdx) {
+  const item = fbState.sections[sIdx].items[iIdx];
+  const newDone = !item.done;
+  const update = {
+    done: newDone,
+    by: newDone ? currentUser : null,
+    ts: newDone ? Date.now() : null
+  };
+  // Optimistic update
+  item.done = update.done; item.by = update.by; item.ts = update.ts;
+  render();
+  try {
+    await fbPatch(`sections/${sIdx}/items/${iIdx}`, update);
+  } catch(e) {
+    toast('Sync error — retrying', 'warn');
+  }
+}
+
+async function toggleIndividual(sIdx, iIdx, person) {
+  if (person !== currentUser) {
+    toast(`You can only check your own box (${currentUser})`, 'warn');
+    return;
+  }
+  const chk = fbState.sections[sIdx].items[iIdx].checks[person];
+  const newDone = !chk.done;
+  const update = { done: newDone, ts: newDone ? Date.now() : null };
+  // Optimistic update
+  chk.done = update.done; chk.ts = update.ts;
+  render();
+  try {
+    await fbPatch(`sections/${sIdx}/items/${iIdx}/checks/${person}`, update);
+  } catch(e) {
+    toast('Sync error — retrying', 'warn');
+  }
+}
+
+function confirmReset() {
+  if (confirm('Reset all checks for tonight? This clears everyone\'s progress.')) {
+    resetNight();
+  }
+}
+
+async function resetNight() {
+  const fresh = buildFreshState();
+  fbState = fresh;
+  render();
+  try {
+    await fbSet('', fresh);
+    toast('Night reset — all items cleared', 'warn');
+  } catch(e) {
+    toast('Reset failed — check connection', 'error');
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  if (!fbState) return;
+  renderSections();
+  renderProgress();
+}
+
+function renderSections() {
+  const container = document.getElementById('sectionsContainer');
+  container.innerHTML = fbState.sections.map((sec, sIdx) => {
+    const isCollapsed = collapsed[sIdx];
+    const hasInd = sec.items.some(i => i.type === 'individual');
+
+    let total = 0, done = 0;
+    sec.items.forEach(item => {
+      if (item.type === 'collective') { total++; if (item.done) done++; }
+      else { TEAM.forEach(p => { total++; if (item.checks && item.checks[p] && item.checks[p].done) done++; }); }
+    });
+
+    const rows = isCollapsed ? '' : sec.items.map((item, iIdx) => {
+      if (item.type === 'collective') {
+        const cls = item.done ? 'all-done' : '';
+        const meta = item.done
+          ? `<div class="task-meta"><span style="color:${COLORS[item.by]||'var(--green)'}; font-weight:600;">${item.by}</span> · ${relTime(item.ts)}</div>`
+          : '';
+        return `<tr class="task-row ${cls}">
+          <td class="col-check"><div class="check-box ${item.done?'done':''}" onclick="toggleCollective(${sIdx},${iIdx})"></div></td>
+          <td><div class="task-text">${esc(item.text)}</div>${meta}</td>
+        </tr>`;
+      } else {
+        const checks = item.checks || {};
+        const allDone = TEAM.every(p => checks[p] && checks[p].done);
+        const anyDone = TEAM.some(p => checks[p] && checks[p].done);
+        const cls = allDone ? 'all-done' : anyDone ? 'partial' : '';
+
+        const personBtns = TEAM.map(p => {
+          const chk = checks[p] || { done: false, ts: null };
+          const isMine = p === currentUser;
+          const c = COLORS[p];
+          const doneStyle = chk.done ? `background:${c}22;border-color:${c};color:${c};` : `border-color:var(--border);color:var(--text-dim);`;
+          const opacityStyle = !isMine ? 'opacity:0.4;' : '';
+          const cursor = isMine ? 'cursor:pointer;' : 'cursor:not-allowed;';
+          return `<div onclick="toggleIndividual(${sIdx},${iIdx},'${p}')"
+            title="${p}${chk.done ? ' ✓ ' + relTime(chk.ts) : ''}"
+            style="${doneStyle}${opacityStyle}${cursor}display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;border-radius:3px;border:1.5px solid;min-width:40px;transition:all 0.15s;font-family:var(--mono);">
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.05em;">${p.slice(0,3).toUpperCase()}</span>
+            <span style="font-size:11px;line-height:1;">${chk.done ? '✓' : '·'}</span>
+          </div>`;
+        }).join('');
+
+        return `<tr class="task-row ${cls}">
+          <td colspan="2" style="padding:10px 12px;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="badge badge-individual" style="font-size:7px;padding:1px 5px;flex-shrink:0">IND</span>
+                <div class="task-text">${esc(item.text)}</div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;">${personBtns}</div>
+            </div>
+          </td>
+        </tr>`;
+      }
+    }).join('');
+
+    const colHeaders = `<tr class="col-header-row">
+      <th class="col-check">✓</th>
+      <th>TASK</th>
+    </tr>`;
+
+    return `<div class="section">
+      <div class="section-header" onclick="collapsed[${sIdx}]=!collapsed[${sIdx}];render()">
+        <div class="section-toggle">${isCollapsed ? '▶' : '▼'}</div>
+        <div class="section-name">${esc(sec.name)}</div>
+        <div class="section-count">${done}/${total}</div>
+      </div>
+      ${isCollapsed ? '' : `<table class="items-table">${colHeaders}${rows}</table>`}
+    </div>`;
+  }).join('');
+}
+
+function renderProgress() {
+  let total = 0, done = 0;
+  fbState.sections.forEach(sec => sec.items.forEach(item => {
+    if (item.type === 'collective') { total++; if (item.done) done++; }
+    else { TEAM.forEach(p => { total++; if (item.checks && item.checks[p] && item.checks[p].done) done++; }); }
+  }));
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressLabel').textContent = `${done} / ${total} COMPLETE`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function relTime(ts) {
+  if (!ts) return '—';
+  const d = Date.now() - ts;
+  if (d < 60000) return 'just now';
+  if (d < 3600000) return Math.floor(d/60000) + 'm ago';
+  if (d < 86400000) return Math.floor(d/3600000) + 'h ago';
+  return Math.floor(d/86400000) + 'd ago';
+}
+let toastTimer;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = 'toast', 3500);
+}
+</script>
+</body>
+</html>
